@@ -1,0 +1,33 @@
+{
+  "name": "my-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NEXT_DISABLE_TURBOPACK=1 next dev",
+    "build": "cross-env NEXT_DISABLE_TURBOPACK=1 next build",
+    "start": "cross-env NEXT_DISABLE_TURBOPACK=1 next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@react-three/drei": "^9.105.6",
+    "@react-three/fiber": "^8.15.14",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.11",
+    "@tailwindcss/typography": "^0.5.19",
+    "framer-motion": "^11.18.2",
+    "next": "^14.2.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.1.6",
+    "typescript": "^5"
+  }
+}
