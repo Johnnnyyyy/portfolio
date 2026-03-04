@@ -26,8 +26,6 @@ function ModelLoader() {
 
   return (
     <>
-      <ambientLight intensity={0.6} />
-
       <CyberpunkGridCube />
 
       {/* 3D Text */}
@@ -136,9 +134,6 @@ function CyberpunkGridCube() {
 function CharacterScene() {
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[2, 4, 3]} intensity={1.2} />
-
       <Suspense fallback={<ModelLoader />}>
         <CharacterModel
           scale={0.7}
