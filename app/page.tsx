@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Experience from "./components/Experience";
 import Loader from "./components/Loader";
-import Scene from "./components/Scene";
 import StartScreen from "./components/StartScreen";
 
 export default function Home() {
@@ -12,5 +12,5 @@ export default function Home() {
   if (!loaded) return <Loader onFinish={() => setLoaded(true)} />;
   if (!started) return <StartScreen onStart={() => setStarted(true)} />;
 
-  return <Scene />;
+  return <Experience />;
 }

@@ -11,7 +11,7 @@ export default function Navbar() {
       className="navbar"
     >
       <div className="nav-content">
-        <h2>John Alcantara</h2>
+        <h2>Johnrey Alcantara</h2>
         <div>
           <a href="#projects">Projects</a>
           <a href="#contact">Contact</a>
