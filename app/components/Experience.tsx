@@ -11,13 +11,14 @@ interface CharacterModelProps {
   scale?: number;
   position?: [number, number, number];
   rotation?: [number, number, number];
+  onLoad?: () => void;
 }
 
-function ModelLoader() {
+function ModelLoader({ onComplete }: { onComplete?: () => void }) {
   const [animatedProgress, setAnimatedProgress] = useState(1); // start at 1%
 
   useEffect(() => {
-    const duration = 5000; // 5 seconds
+    const duration = 6000; // 6 seconds
     const startTime = performance.now();
 
     const animate = (time: number) => {
@@ -25,11 +26,15 @@ function ModelLoader() {
       const progress = Math.min((elapsed / duration) * 100, 100);
       setAnimatedProgress(progress);
 
-      if (progress < 100) requestAnimationFrame(animate);
+      if (progress < 100) {
+        requestAnimationFrame(animate);
+      } else if (onComplete) {
+        onComplete();
+      }
     };
 
     requestAnimationFrame(animate);
-  }, []);
+  }, [onComplete]);
 
   return (
     <>
@@ -45,8 +50,14 @@ function ModelLoader() {
   );
 }
 
-function CharacterModel({ scale = 1, position = [0, 0, 0], rotation = [0, 0, 0] }: CharacterModelProps) {
+function CharacterModel({ scale = 1, position = [0, 0, 0], rotation = [0, 0, 0], onLoad }: CharacterModelProps) {
   const gltf = useGLTF('/models/cyberpunk_character.glb');
+
+  useEffect(() => {
+    if (gltf?.scene && onLoad) {
+      onLoad();
+    }
+  }, [gltf?.scene, onLoad]);
 
   // Fallback: show a simple loading box using Drei's Html overlay
   if (!gltf?.scene) {
@@ -105,14 +116,16 @@ function CyberpunkGridCube() {
 }
 
 function CharacterScene() {
+  const [showCube, setShowCube] = useState(true);
+
   return (
     <>
       <ambientLight intensity={0.7} />
       <directionalLight position={[2, 4, 3]} intensity={1.2} />
-      <Suspense fallback={<ModelLoader />}>
-        <CharacterModel scale={0.7} position={[0, -1.2, 0]} rotation={[0, Math.PI, 0]} />
+      <Suspense fallback={<ModelLoader onComplete={() => setShowCube(false)} />}>
+        <CharacterModel scale={0.7} position={[0, -1.2, 0]} rotation={[0, Math.PI, 0]} onLoad={() => setShowCube(false)} />
       </Suspense>
-      <CyberpunkGridCube />
+      {showCube && <CyberpunkGridCube />}
       <Environment preset="city" />
       <OrbitControls enableZoom={false} />
     </>
