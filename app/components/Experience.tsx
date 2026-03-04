@@ -3,7 +3,6 @@ import { Text as DreiText, Environment, OrbitControls, useGLTF } from "@react-th
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-
 useGLTF.preload("/models/cyberpunk_character.glb");
 
 function ModelLoader() {
@@ -26,10 +25,10 @@ function ModelLoader() {
 
   return (
     <>
+    <Canvas>
       <ambientLight intensity={0.6} />
-
       <CyberpunkGridCube />
-
+    </Canvas>
       {/* 3D Text */}
       <DreiText
         position={[0, -1.2, 0]}
@@ -136,9 +135,9 @@ function CyberpunkGridCube() {
 function CharacterScene() {
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[2, 4, 3]} intensity={1.2} />
-
+    <Canvas>
+          <ambientLight intensity={0.7} />
+          <directionalLight position={[2, 4, 3]} intensity={1.2} />
       <Suspense fallback={<ModelLoader />}>
         <CharacterModel
           scale={0.7}
@@ -146,7 +145,7 @@ function CharacterScene() {
           rotation={[0, Math.PI, 0]}
         />
       </Suspense>
-
+    </Canvas>
       <Environment preset="city" />
       <OrbitControls enableZoom={false} />
     </>

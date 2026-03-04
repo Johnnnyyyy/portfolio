@@ -1,7 +1,10 @@
 // types/react-three-fiber.d.ts
+import '@react-three/fiber';
 import { ReactThreeFiber } from "@react-three/fiber";
 import * as THREE from "three";
-
+declare module '@react-three/fiber' {
+  // This is usually optional; most things are already typed.
+}
 declare global {
   namespace JSX {
     interface IntrinsicElements {
