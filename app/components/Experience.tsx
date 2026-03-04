@@ -1,6 +1,6 @@
 'use client';
 
-import { Text as DreiText, Environment, OrbitControls, useGLTF } from '@react-three/drei';
+import { Text as DreiText, Environment, Html, OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
@@ -48,14 +48,28 @@ function ModelLoader() {
 function CharacterModel({ scale = 1, position = [0, 0, 0], rotation = [0, 0, 0] }: CharacterModelProps) {
   const gltf = useGLTF('/models/cyberpunk_character.glb');
 
+  // Fallback: show a simple loading box using Drei's Html overlay
   if (!gltf?.scene) {
-    return (
-      <mesh scale={scale} position={position} rotation={rotation}>
-        <sphereGeometry args={[0.5, 32, 32]} />
-        <meshStandardMaterial color="#38bdf8" />
-      </mesh>
-    );
-  }
+  return (
+    <Html center position={position}>
+      <div
+        style={{
+          width: 80,
+          height: 80,
+          background: '#38bdf8',
+          borderRadius: 8,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontWeight: 'bold',
+        }}
+      >
+        Loading...
+      </div>
+    </Html>
+  );
+}
 
   return <primitive object={gltf.scene} scale={scale} position={position} rotation={rotation} />;
 }
