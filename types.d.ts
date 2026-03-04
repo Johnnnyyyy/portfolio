@@ -11,7 +11,11 @@ import type {
   SphereGeometryProps,
   SpotLightProps,
 } from '@react-three/fiber';
-import type { Object3D } from 'three';
+import type { Object3D, TorusGeometry } from 'three';
+
+type TorusGeometryProps = JSX.IntrinsicElements['torusGeometry'] extends undefined 
+  ? { args?: ConstructorParameters<typeof TorusGeometry> }
+  : JSX.IntrinsicElements['torusGeometry'];
 
 declare module 'react' {
   namespace JSX {
@@ -20,6 +24,7 @@ declare module 'react' {
       group: GroupProps;
       sphereGeometry: SphereGeometryProps;
       boxGeometry: BoxGeometryProps;
+      torusGeometry: TorusGeometryProps;
       meshStandardMaterial: MeshStandardMaterialProps;
       primitive: PrimitiveProps<Object3D>;
       ambientLight: AmbientLightProps;

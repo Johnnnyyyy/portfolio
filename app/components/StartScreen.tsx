@@ -9,11 +9,11 @@ export default function StartScreen({ onStart }: { onStart: () => void }) {
   };
 
   return (
-    <div className="fullscreen center bg-black text-white">
+    <div className="fullscreen center text-white">
       <motion.button
         whileHover={{
           scale: 1.05,
-          boxShadow: "0 0 24px #38bdf8, 0 0 48px #0ea5e9",
+          boxShadow: "0 0 15px #ff0080, 0 0 25px #00ffff",
         }}
         whileTap={{ scale: 0.95 }}
         onClick={handleClick}
