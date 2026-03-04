@@ -14,7 +14,7 @@ interface CharacterModelProps {
   onLoad?: () => void;
 }
 
-function ModelLoader({ onComplete }: { onComplete?: () => void }) {
+function ModelLoader() {
   const [animatedProgress, setAnimatedProgress] = useState(1); // start at 1%
 
   useEffect(() => {
@@ -28,13 +28,11 @@ function ModelLoader({ onComplete }: { onComplete?: () => void }) {
 
       if (progress < 100) {
         requestAnimationFrame(animate);
-      } else if (onComplete) {
-        onComplete();
       }
     };
 
     requestAnimationFrame(animate);
-  }, [onComplete]);
+  }, []);
 
   return (
     <>
@@ -51,6 +49,8 @@ function ModelLoader({ onComplete }: { onComplete?: () => void }) {
 }
 
 function CharacterModel({ scale = 1, position = [0, 0, 0], rotation = [0, 0, 0], onLoad }: CharacterModelProps) {
+  const groupRef = useRef<THREE.Group>(null);
+  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const gltf = useGLTF('/models/cyberpunk_character.glb');
 
   useEffect(() => {
@@ -58,6 +58,36 @@ function CharacterModel({ scale = 1, position = [0, 0, 0], rotation = [0, 0, 0],
       onLoad();
     }
   }, [gltf?.scene, onLoad]);
+
+  // Set up animations if available
+  useEffect(() => {
+    if (gltf?.animations && gltf.animations.length > 0) {
+      mixerRef.current = new THREE.AnimationMixer(gltf.scene);
+      // Play the first animation (usually idle or dance)
+      const action = mixerRef.current.clipAction(gltf.animations[0]);
+      action.play();
+    }
+    
+    return () => {
+      if (mixerRef.current) {
+        mixerRef.current.stopAllAction();
+      }
+    };
+  }, [gltf]);
+
+  // Update animation mixer each frame, or apply procedural animation
+  useFrame((state, delta) => {
+    // Update animation mixer if it exists
+    if (mixerRef.current) {
+      mixerRef.current.update(delta);
+    } else if (groupRef.current) {
+      // Subtle idle breathing animation if no built-in animations
+      const t = state.clock.elapsedTime;
+      
+      // Gentle bobbing up and down (breathing effect)
+      groupRef.current.position.y = position[1] + Math.sin(t * 1.5) * 0.02;
+    }
+  });
 
   // Fallback: show a simple loading box using Drei's Html overlay
   if (!gltf?.scene) {
@@ -82,7 +112,11 @@ function CharacterModel({ scale = 1, position = [0, 0, 0], rotation = [0, 0, 0],
   );
 }
 
-  return <primitive object={gltf.scene} scale={scale} position={position} rotation={rotation} />;
+  return (
+    <group ref={groupRef} position={position} rotation={rotation}>
+      <primitive object={gltf.scene} scale={scale} />
+    </group>
+  );
 }
 
 function CyberpunkGridCube() {
@@ -116,16 +150,21 @@ function CyberpunkGridCube() {
 }
 
 function CharacterScene() {
-  const [showCube, setShowCube] = useState(true);
+  const [modelLoaded, setModelLoaded] = useState(false);
 
   return (
     <>
       <ambientLight intensity={0.7} />
       <directionalLight position={[2, 4, 3]} intensity={1.2} />
-      <Suspense fallback={<ModelLoader onComplete={() => setShowCube(false)} />}>
-        <CharacterModel scale={0.7} position={[0, -1.2, 0]} rotation={[0, Math.PI, 0]} onLoad={() => setShowCube(false)} />
+      <Suspense fallback={null}>
+        <CharacterModel scale={0.7} position={[0, -1.2, 0]} rotation={[0, Math.PI, 0]} onLoad={() => setModelLoaded(true)} />
       </Suspense>
-      {showCube && <CyberpunkGridCube />}
+      {!modelLoaded && (
+        <>
+          <ModelLoader />
+          <CyberpunkGridCube />
+        </>
+      )}
       <Environment preset="city" />
       <OrbitControls enableZoom={false} />
     </>
