@@ -15,7 +15,7 @@ interface CharacterModelProps {
   hoveredSkill?: string | null;
 }
 
-function ModelLoader() {
+function ModelLoader({ opacity = 1 }: { opacity?: number }) {
   const [animatedProgress, setAnimatedProgress] = useState(1); // start at 1%
 
   useEffect(() => {
@@ -37,12 +37,29 @@ function ModelLoader() {
 
   return (
     <>
-      {/* 3D Text */}
-      <DreiText position={[0, -1.2, 0]} fontSize={0.1} color="#00ffff" anchorX="center" anchorY="middle">
+      {/* Add a point light to illuminate the loading elements */}
+      <pointLight position={[0, 0, 2]} intensity={3 * opacity} color="#ffffff" />
+      
+      {/* 3D Text - Below the cube */}
+      <DreiText 
+        position={[0, -1.3, 0]} 
+        fontSize={0.1} 
+        color="#ffffff" 
+        anchorX="center" 
+        anchorY="middle"
+        fillOpacity={opacity}
+      >
         LOADING CHARACTER
       </DreiText>
 
-      <DreiText position={[0, -1, 0]} fontSize={0.1} color="#ffffff" anchorX="center" anchorY="middle">
+      <DreiText 
+        position={[0, -1.5, 0]} 
+        fontSize={0.12} 
+        color="#ffffff" 
+        anchorX="center" 
+        anchorY="middle"
+        fillOpacity={opacity}
+      >
         {animatedProgress.toFixed(0)}%
       </DreiText>
     </>
@@ -158,8 +175,10 @@ function CharacterModel({ scale = 1, position = [0, 0, 0], rotation = [0, 0, 0],
   );
 }
 
-function CyberpunkGridCube() {
+function CyberpunkGridCube({ opacity = 1 }: { opacity?: number }) {
   const groupRef = useRef<THREE.Group>(null);
+  const outerMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const innerMatRef = useRef<THREE.MeshBasicMaterial>(null);
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -169,20 +188,28 @@ function CyberpunkGridCube() {
 
     const float = Math.sin(state.clock.elapsedTime * 2) * 0.05;
     groupRef.current.position.y = float;
+    
+    // Update opacity
+    if (outerMatRef.current) outerMatRef.current.opacity = opacity;
+    if (innerMatRef.current) innerMatRef.current.opacity = opacity;
+    
+    // Shrink as it fades out (scale from 0.5 down to 0.1)
+    const shrinkScale = 0.1 + (opacity * 0.4);
+    groupRef.current.scale.setScalar(shrinkScale);
   });
 
   return (
-    <group ref={groupRef} scale={0.6}>
-      {/* Outer Wireframe */}
+    <group ref={groupRef} scale={0.5}>
+      {/* Outer Wireframe - Cyan */}
       <mesh>
         <boxGeometry args={[1.5, 1.5, 1.5]} />
-        <meshStandardMaterial color="#00ffff" wireframe emissive="#00ffff" emissiveIntensity={2} />
+        <meshBasicMaterial ref={outerMatRef} color="#00ffff" wireframe transparent opacity={opacity} />
       </mesh>
 
-      {/* Inner Grid */}
+      {/* Inner Grid - Magenta/Pink */}
       <mesh scale={0.8}>
         <boxGeometry args={[1.5, 1.5, 1.5, 8, 8, 8]} />
-        <meshStandardMaterial color="#ff00ff" wireframe emissive="#ff00ff" emissiveIntensity={1.5} />
+        <meshBasicMaterial ref={innerMatRef} color="#ff00ff" wireframe transparent opacity={opacity} />
       </mesh>
     </group>
   );
@@ -311,19 +338,46 @@ function AuraEffect({ isActive, skillLevel }: { isActive: boolean; skillLevel: S
 
 function CharacterScene({ hoveredSkill, skillLevel }: { hoveredSkill: string | null; skillLevel: SkillLevel }) {
   const [modelLoaded, setModelLoaded] = useState(false);
+  const [loadingOpacity, setLoadingOpacity] = useState(1);
+  const [showLoader, setShowLoader] = useState(true);
+
+  // Smooth fade out when model loads
+  useEffect(() => {
+    if (modelLoaded) {
+      // Start fade out animation
+      const fadeStart = performance.now();
+      const fadeDuration = 800; // 800ms fade
+      
+      const animateFade = (time: number) => {
+        const elapsed = time - fadeStart;
+        const progress = Math.min(elapsed / fadeDuration, 1);
+        const newOpacity = 1 - progress;
+        
+        setLoadingOpacity(newOpacity);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateFade);
+        } else {
+          setShowLoader(false); // Remove from DOM after fade complete
+        }
+      };
+      
+      requestAnimationFrame(animateFade);
+    }
+  }, [modelLoaded]);
 
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[2, 4, 3]} intensity={1.2} />
+      <ambientLight intensity={1.5} />
+      <directionalLight position={[2, 4, 3]} intensity={2} />
       <Suspense fallback={null}>
         <CharacterModel scale={0.7} position={[0, -1.2, 0]} rotation={[0, Math.PI, 0]} onLoad={() => setModelLoaded(true)} hoveredSkill={hoveredSkill} />
         <AuraEffect isActive={hoveredSkill !== null} skillLevel={skillLevel} />
       </Suspense>
-      {!modelLoaded && (
+      {showLoader && (
         <>
-          <ModelLoader />
-          <CyberpunkGridCube />
+          <ModelLoader opacity={loadingOpacity} />
+          <CyberpunkGridCube opacity={loadingOpacity} />
         </>
       )}
       <Environment preset="city" />

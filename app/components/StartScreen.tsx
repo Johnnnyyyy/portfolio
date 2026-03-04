@@ -13,7 +13,7 @@ export default function StartScreen({ onStart }: { onStart: () => void }) {
       <motion.button
         whileHover={{
           scale: 1.05,
-          boxShadow: "0 0 15px #ff0080, 0 0 25px #00ffff",
+          boxShadow: "0 0 15px rgba(255, 255, 255, 0.4)",
         }}
         whileTap={{ scale: 0.95 }}
         onClick={handleClick}
