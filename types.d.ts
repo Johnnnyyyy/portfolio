@@ -1,16 +1,31 @@
 import '@react-three/fiber';
-import { BoxGeometryProps, MeshProps, MeshStandardMaterialProps, PrimitiveProps, SphereGeometryProps } from '@react-three/fiber';
-import { Group, Object3D } from 'three';
+import type {
+  AmbientLightProps,
+  BoxGeometryProps,
+  DirectionalLightProps,
+  GroupProps,
+  MeshProps,
+  MeshStandardMaterialProps,
+  PointLightProps,
+  PrimitiveProps,
+  SphereGeometryProps,
+  SpotLightProps,
+} from '@react-three/fiber';
+import type { Object3D } from 'three';
 
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      mesh: MeshProps & { children?: React.ReactNode };
+      mesh: MeshProps;
+      group: GroupProps;
       sphereGeometry: SphereGeometryProps;
       boxGeometry: BoxGeometryProps;
       meshStandardMaterial: MeshStandardMaterialProps;
-      group: { children?: React.ReactNode } & Partial<Group>;
       primitive: PrimitiveProps<Object3D>;
+      ambientLight: AmbientLightProps;
+      directionalLight: DirectionalLightProps;
+      pointLight: PointLightProps;
+      spotLight: SpotLightProps;
     }
   }
 }
